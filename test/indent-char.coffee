@@ -39,7 +39,7 @@ describe 'indent_style/indent_size rule integration (spaces)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\n  line two\n    line three\n')
+      String(res).should.eql('line one\n  line two\n    line three\n')
       done()
     )
 
@@ -51,7 +51,7 @@ describe 'indent_style/indent_size rule integration (spaces)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\n  line two\n    line three\n')
+      String(res).should.eql('line one\n  line two\n    line three\n')
       done()
     )
 
@@ -84,7 +84,7 @@ describe 'indent_style/indent_size rule integration (tabs)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\n\tline two\n\t\tline three\n')
+      String(res).should.eql('line one\n\tline two\n\t\tline three\n')
       done()
     )
 
@@ -96,6 +96,6 @@ describe 'indent_style/indent_size rule integration (tabs)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\n\tline two\n\t\tline three\n')
+      String(res).should.eql('line one\n\tline two\n\t\tline three\n')
       done()
     )

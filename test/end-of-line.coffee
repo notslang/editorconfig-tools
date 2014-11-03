@@ -41,7 +41,7 @@ describe 'end_of_line rule integration tests', ->
     ).then(
       @rule.infer
     ).done((res) ->
-      res.should.eql('lf')
+      String(res).should.eql('lf')
       done()
     )
 
@@ -63,7 +63,7 @@ describe 'end_of_line rule integration tests', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\r\nline two\r\nline three\r\n')
+      String(res).should.eql('line one\r\nline two\r\nline three\r\n')
       done()
     )
 
@@ -75,7 +75,7 @@ describe 'end_of_line rule integration tests', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\r\nline two\r\nline three\r\n')
+      String(res).should.eql('line one\r\nline two\r\nline three\r\n')
       done()
     )
 
@@ -87,6 +87,6 @@ describe 'end_of_line rule integration tests', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\r\nline two\r\nline three')
+      String(res).should.eql('line one\r\nline two\r\nline three')
       done()
     )

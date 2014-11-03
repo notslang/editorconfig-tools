@@ -79,7 +79,7 @@ describe 'trim_trailing_whitespace rule integration (true)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\nline two\n')
+      String(res).should.eql('line one\nline two\n')
       done()
     )
 
@@ -91,6 +91,6 @@ describe 'trim_trailing_whitespace rule integration (true)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line one\nline two\n')
+      String(res).should.eql('line one\nline two\n')
       done()
     )

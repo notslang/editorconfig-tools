@@ -10,7 +10,7 @@ class LineRule extends Rule
   ###
   fileAsLines: =>
     @file.read(encoding: 'utf8').then((data) ->
-      lines = data.split(/(\r\n|\n|\r)/)
+      lines = String(data).split(/(\r\n|\n|\r)/)
       # right now the capturing group from the regex is every other element in
       # `lines`. Those groups need to be joined with the line before them.
       i = 0

@@ -11,7 +11,7 @@ class InsertFinalNewline extends Rule
 
   fix: =>
     @file.read(encoding:'utf8').then((data) =>
-      @file.write(data.replace(@_finalNewline, (match) =>
+      @file.write(String(data).replace(@_finalNewline, (match) =>
         if @setting is false
           ''
         else
@@ -29,7 +29,7 @@ class InsertFinalNewline extends Rule
   infer: =>
     @file.read(encoding:'utf8').then((data) =>
       if data is '' then return true # empty files don't need final newlines
-      finalNewline = data.match(@_finalNewline)
+      finalNewline = String(data).match(@_finalNewline)
       return (finalNewline? and finalNewline[0] isnt '')
     )
 
