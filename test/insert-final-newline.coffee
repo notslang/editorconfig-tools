@@ -42,7 +42,7 @@ describe 'insert_final_newline rule integration (true)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line\n')
+      String(res).should.eql('line\n')
       done()
     )
 
@@ -54,7 +54,7 @@ describe 'insert_final_newline rule integration (true)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line\n')
+      String(res).should.eql('line\n')
       done()
     )
 
@@ -87,7 +87,7 @@ describe 'insert_final_newline rule integration (false)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line')
+      String(res).should.eql('line')
       done()
     )
 
@@ -99,6 +99,6 @@ describe 'insert_final_newline rule integration (false)', ->
     ).then( =>
       @file.read(encoding: 'utf8')
     ).done((res) ->
-      res.should.eql('line')
+      String(res).should.eql('line')
       done()
     )
