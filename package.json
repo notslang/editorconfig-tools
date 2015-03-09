@@ -14,6 +14,7 @@
     "detect-indent": "^3.0.1",
     "editorconfig": "^0.12.1",
     "fobject": "0.0.3",
+    "glob": "^5.0.1",
     "graceful-fs": "^3.0.4",
     "lodash": "^2.4.1",
     "require-tree": "^0.3.3",
