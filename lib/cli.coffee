@@ -1,4 +1,6 @@
 path = require 'path'
+glob = require('glob').sync
+
 packageInfo = require(path.join(__dirname, '../package.json'))
 ArgumentParser = require('argparse').ArgumentParser
 {check, fix, infer} = require './index'
@@ -53,6 +55,8 @@ fixCommand.addArgument(
 )
 
 argv = argparser.parseArgs()
+
+argv.files = Array::concat.apply [], (argv.files.map (f) -> glob f)
 
 if argv.action is 'check'
   check(argv.files)
