@@ -1,6 +1,9 @@
 path = require 'path'
+glob = require('glob').sync
+
 packageInfo = require(path.join(__dirname, '../package.json'))
 ArgumentParser = require('argparse').ArgumentParser
+{check, fix, infer} = require './index'
 
 argparser = new ArgumentParser(
   version: packageInfo.version
@@ -11,12 +14,12 @@ subparsers = argparser.addSubparsers(
   title: 'action'
   dest: 'action'
 )
-infer = subparsers.addParser(
+inferCommand = subparsers.addParser(
   'infer'
   help: 'Infer .editorconfig settings from one or more files'
   addHelp: true
 )
-infer.addArgument(
+inferCommand.addArgument(
   ['files']
   type: 'string'
   metavar: 'FILE'
@@ -24,13 +27,13 @@ infer.addArgument(
   help: 'The file(s) to use'
 )
 
-check = subparsers.addParser(
+checkCommand = subparsers.addParser(
   'check'
   help: 'Validate that file(s) adhere to .editorconfig settings, returning an
   error code if they don\'t'
   addHelp: true
 )
-check.addArgument(
+checkCommand.addArgument(
   ['files']
   type: 'string'
   metavar: 'FILE'
@@ -38,12 +41,12 @@ check.addArgument(
   help: 'The file(s) to use'
 )
 
-fix = subparsers.addParser(
+fixCommand = subparsers.addParser(
   'fix'
   help: 'Fix formatting errors that disobey .editorconfig settings'
   addHelp: true
 )
-fix.addArgument(
+fixCommand.addArgument(
   ['files']
   type: 'string'
   metavar: 'FILE'
@@ -53,149 +56,11 @@ fix.addArgument(
 
 argv = argparser.parseArgs()
 
-editorconfig = require 'editorconfig'
-fs = require 'graceful-fs'
-path = require 'path'
-W = require 'when'
-_ = require 'lodash'
-requireTree = require 'require-tree'
-Rules = requireTree './rules'
-
-exitCode = 0
+argv.files = Array::concat.apply [], (argv.files.map (f) -> glob f)
 
 if argv.action is 'check'
-  promises = []
-  Object.keys(Rules).forEach (ruleName) ->
-    Rule = Rules[ruleName]
-    argv.files.forEach (filePath) ->
-      if fs.lstatSync(filePath).isDirectory() then return
-      property = undefined
-      promises.push(
-        (new Rule(filePath)).then((returnedProperty) ->
-          property = returnedProperty
-          property.check()
-        ).then((res) ->
-          res: res
-          file: filePath
-          rule: property.propertyName
-        ).catch((err) ->
-          file: filePath
-          rule: property.propertyName
-          error: err
-        )
-      )
-
-  W.all(promises).done((res) ->
-    files = _.uniq _.pluck(res, 'file')
-    for file in files
-      matches = _.where res, file: file
-      verbose = true
-      if verbose or _.compact(_.pluck(matches, 'error')).length > 0
-        for match in matches
-          if match.error?
-            exitCode = 1
-            text = "#{file} failed #{match.rule}"
-            if match.error.lineNumber?
-              text += " on line #{match.error.lineNumber}"
-            if match.error.message?
-              text += ": #{match.error.message}"
-            console.log text
-          else if verbose
-            if match.res is null
-              console.log "#{file} ignored #{match.rule} (no setting defined)"
-            else
-              #console.log "#{file} passed #{match.rule}"
-    process.exit(exitCode)
-  )
+  check(argv.files)
 else if argv.action is 'fix'
-  results = []
-  promise = W.resolve()
-  for ruleName in Object.keys(Rules)
-    Rule = Rules[ruleName]
-    for filePath in argv.files
-      if fs.lstatSync(filePath).isDirectory() then continue
-      do (Rule, filePath) ->
-        property = undefined
-        promise = promise.then( ->
-          new Rule(filePath)
-        ).then((returnedProperty) ->
-          property = returnedProperty
-          property.fix()
-        ).then((res) ->
-          results.push(
-            res: res
-            file: filePath
-            rule: property.propertyName
-          )
-        ).catch((err) ->
-          results.push(
-            file: filePath
-            rule: property.propertyName
-            error: err
-          )
-        )
-
-  promise.done ->
-    verbose = true
-    for result in results
-      if result.error?
-        console.log "#{result.file} #{result.error.message}"
-      else if verbose
-        console.log "#{result.file} fixed"
-
+  fix(argv.files)
 else if argv.action is 'infer'
-  promises = []
-  Object.keys(Rules).forEach (ruleName) ->
-    Rule = Rules[ruleName]
-    argv.files.forEach (filePath) ->
-      if fs.lstatSync(filePath).isDirectory() then return
-      property = undefined
-      promises.push(
-        (new Rule(filePath)).then((returnedProperty) ->
-          property = returnedProperty
-          property.infer()
-        ).then((res) ->
-          res: String res
-          file: filePath
-          rule: property.propertyName
-        ).catch((err) ->
-          file: filePath
-          rule: property.propertyName
-          error: err
-        )
-      )
-
-  W.all(promises).done((res) ->
-    rules = {}
-    groups = _.groupBy(res, 'rule')
-    for property, group of groups
-      distributionOfValues = _.pairs _.countBy _.pluck(group, 'res'), (x) -> x
-      sortedValues = _.sortBy distributionOfValues, (x) -> -x[1]
-
-      # most common value gets to be global
-      rules['[*]'] ?= []
-      rules['[*]'].push([property, sortedValues[0][0]])
-
-      # the rest are given a selector based on what files they hit
-      for value in sortedValues[1..]
-        if value[0] in ['null', 'undefined'] then continue
-        files = _.pluck _.where(group, res: value[0]), 'file'
-        selector = "[{#{files.join(',')}}]"
-        rules[selector] ?= []
-        rules[selector].push([property, value[0]])
-
-
-    for selector, ruleGroup of rules
-      console.log selector
-      for rule in ruleGroup
-        if rule[0] is 'indent_char'
-          if rule[1] is '\t'
-            console.log 'indent_style: tab'
-          else
-            console.log 'indent_style = space'
-            console.log "indent_size = #{rule[1].length}"
-        else
-          console.log "#{rule[0]} = #{rule[1]}"
-
-      console.log ''
-  )
+  infer(argv.files)
