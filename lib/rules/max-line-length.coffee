@@ -21,7 +21,7 @@ class MaxLineLength extends LineRule
 
   checkLine: (line, lineNum) =>
     lineLength = @inferLine(line)
-    if lineLength > @setting
+    if lineLength > 0 and lineLength > @setting
       throw new EditorConfigError(
         "line is #{lineLength} chars, it should be #{@setting}"
         @file.path
