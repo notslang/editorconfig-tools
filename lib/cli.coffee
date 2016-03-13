@@ -1,4 +1,5 @@
 {ArgumentParser} = require 'argparse'
+fs = require 'graceful-fs'
 
 packageInfo = require '../package'
 {check, fix, infer} = require './index'
@@ -53,6 +54,10 @@ fixCommand.addArgument(
 )
 
 argv = argparser.parseArgs()
+
+argv.files = argv.files.filter((filePath) ->
+  not fs.lstatSync(filePath).isDirectory()
+)
 
 if argv.action is 'check'
   check(argv.files)

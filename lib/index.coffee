@@ -1,6 +1,5 @@
 BPromise = require 'bluebird'
 _ = require 'lodash'
-fs = require 'graceful-fs'
 
 requireTree = require 'require-tree'
 Rules = requireTree './rules'
@@ -11,7 +10,6 @@ check = (files) ->
   Object.keys(Rules).forEach (ruleName) ->
     Rule = Rules[ruleName]
     files.forEach (filePath) ->
-      if fs.lstatSync(filePath).isDirectory() then return
       property = undefined
       promises.push(
         (new Rule(filePath)).then((returnedProperty) ->
@@ -57,7 +55,6 @@ fix = (files) ->
   for ruleName in Object.keys(Rules)
     Rule = Rules[ruleName]
     for filePath in files
-      if fs.lstatSync(filePath).isDirectory() then continue
       do (Rule, filePath) ->
         property = undefined
         promise = promise.then( ->
@@ -92,7 +89,6 @@ infer = (files) ->
   Object.keys(Rules).forEach (ruleName) ->
     Rule = Rules[ruleName]
     files.forEach (filePath) ->
-      if fs.lstatSync(filePath).isDirectory() then return
       property = undefined
       promises.push(
         (new Rule(filePath)).then((returnedProperty) ->
