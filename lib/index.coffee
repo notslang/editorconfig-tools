@@ -34,7 +34,7 @@ check = (files) ->
     files = _.uniq _.map(res, 'file')
     for file in files
       matches = _.filter res, file: file
-      verbose = true
+      verbose = false
       if verbose or _.compact(_.map(matches, 'error')).length > 0
         for match in matches
           if match.error?
