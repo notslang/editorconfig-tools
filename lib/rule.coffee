@@ -40,7 +40,7 @@ class Rule
    * @return {Promise}
   ###
   fix: =>
-    if not @setting?
+    if not @setting? or @setting == "unset"
       W.reject(new EditorConfigError(
         "cannot fix #{@propertyName} (no setting defined)"
       ))
